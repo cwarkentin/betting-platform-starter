@@ -1,0 +1,96 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: betting_postgres
+    environment:
+      POSTGRES_DB: betting_platform
+      POSTGRES_USER: betting_user
+      POSTGRES_PASSWORD: betting_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U betting_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: betting_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Laravel API
+  laravel-api:
+    build:
+      context: ./laravel-api
+      dockerfile: Dockerfile
+    container_name: betting_laravel_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./laravel-api:/var/www/html
+    environment:
+      APP_NAME: "Betting Platform API"
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8000
+      
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: betting_platform
+      DB_USERNAME: betting_user
+      DB_PASSWORD: betting_pass
+      
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
+      
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      
+      SPORTS_API_URL: http://python-service:5000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: php artisan serve --host=0.0.0.0 --port=8000
+
+  # Python Sports Data Service
+  python-service:
+    build:
+      context: ./python-service
+      dockerfile: Dockerfile
+    container_name: betting_python_service
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./python-service:/app
+    environment:
+      FLASK_APP: app.py
+      FLASK_ENV: development
+      DATABASE_URL: postgresql://betting_user:betting_pass@postgres:5432/betting_platform
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: python app.py
+
+volumes:
+  postgres_data:
+  redis_data:
