@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(docker-compose exec *)",
+      "Bash(python3 -c \"import sys,json; [print\\(json.loads\\(l\\).get\\('message',''\\)\\) for l in sys.stdin if l.strip\\(\\)]\")"
+    ]
+  }
+}

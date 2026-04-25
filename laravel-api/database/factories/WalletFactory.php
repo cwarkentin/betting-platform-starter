@@ -1,0 +1,32 @@
+<?php
+
+namespace Database\Factories;
+
+use App\Models\Wallet;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\User;                                                                                                                            
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+
+/**
+ * @extends Factory<Wallet>
+ */
+class WalletFactory extends Factory
+{
+
+    /**
+     * Define the model's default state.
+     * ['user_id', 'balance', 'currency', 'status']
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'user_id' => User::factory(),
+            'balance' => 0,
+            'currency' => 'USD',
+            'status' => 'active',
+        ];
+    }
+}

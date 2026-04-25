@@ -93,7 +93,27 @@ class BetPlacementTest extends TestCase
         ]);
 
         $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['event_id']);
+
         $this->assertDatabaseCount('bets', 0);
+        $this->assertEquals(500.00, $this->wallet->fresh()->balance);
+    }
+
+    public function test_bet_is_rejected_when_wallet_is_not_active(): void 
+    {
+        $this->wallet->update(['status' => 'frozen']);
+
+        $response = $this->actingAs($this->user)->postJson('/api/bets', [
+            'event_id'  => $this->event->id,
+            'selection' => 'home',
+            'amount'    => 100.00,
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['status']);
+
+        $this->assertDatabaseCount('bets', 0);
+        $this->assertEquals(500.00, $this->wallet->fresh()->balance);
     }
 
     public function test_unauthenticated_user_cannot_place_bet(): void

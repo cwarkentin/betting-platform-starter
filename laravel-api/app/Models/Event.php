@@ -3,9 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Event extends Model
 {
+    /** @use HasFactory<EventFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'name', 'sport_type', 'home_team', 'away_team',
         'home_odds', 'away_odds', 'draw_odds',
