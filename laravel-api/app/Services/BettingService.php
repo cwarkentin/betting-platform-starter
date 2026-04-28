@@ -15,13 +15,13 @@ class BettingService
     {
         $wallet = $user->wallet;
 
-        if ( $wallet->status !== 'active') {
+        if ($wallet->status !== 'active') {
             throw ValidationException::withMessages([
                 'status' => 'Wallet is not active.',
             ]);
         }
 
-        if ( $wallet->balance < $data['amount']) {
+        if ($wallet->balance < $data['amount']) {
             throw ValidationException::withMessages([
                 'amount' => 'Invalid balance.',
             ]);

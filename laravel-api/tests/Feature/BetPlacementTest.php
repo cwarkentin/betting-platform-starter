@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\Bet;
 use App\Models\Event;
 use App\Models\User;
 use App\Models\Wallet;
@@ -37,7 +36,7 @@ class BetPlacementTest extends TestCase
 
     public function test_user_can_place_bet_on_upcoming_event(): void
     {
-        $response = $this->actingAs($this->user)->postJson('/api/bets', [
+        $response = $this->actingAs($this->user, 'sanctum')->postJson('/api/bets', [
             'event_id'  => $this->event->id,
             'selection' => 'home',
             'amount'    => 100.00,
@@ -69,7 +68,7 @@ class BetPlacementTest extends TestCase
 
     public function test_bet_is_rejected_when_balance_is_insufficient(): void
     {
-        $response = $this->actingAs($this->user)->postJson('/api/bets', [
+        $response = $this->actingAs($this->user, 'sanctum')->postJson('/api/bets', [
             'event_id'  => $this->event->id,
             'selection' => 'home',
             'amount'    => 1000.00,
@@ -86,7 +85,7 @@ class BetPlacementTest extends TestCase
     {
         $this->event->update(['status' => 'completed']);
 
-        $response = $this->actingAs($this->user)->postJson('/api/bets', [
+        $response = $this->actingAs($this->user, 'sanctum')->postJson('/api/bets', [
             'event_id'  => $this->event->id,
             'selection' => 'home',
             'amount'    => 50.00,
@@ -103,7 +102,7 @@ class BetPlacementTest extends TestCase
     {
         $this->wallet->update(['status' => 'frozen']);
 
-        $response = $this->actingAs($this->user)->postJson('/api/bets', [
+        $response = $this->actingAs($this->user, 'sanctum')->postJson('/api/bets', [
             'event_id'  => $this->event->id,
             'selection' => 'home',
             'amount'    => 100.00,
